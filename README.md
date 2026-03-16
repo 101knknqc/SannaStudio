@@ -1,214 +1,180 @@
-# SannaStudio — MVC v3
+# SannaStudio — MVC v4
 
 > Prestataire technique en webdiffusion professionnelle et intégration audiovisuelle au Québec.
 
 ---
 
-## Nouveautés v3
+## Nouveautés v4
 
-- ✅ **CSS corrigé** — bug `hero-visual { display:none }` hors media query supprimé
-- ✅ **Mailer SMTP réécrit** — `EHLO` avec hostname local, timeouts robustes
-- ✅ **Mail de confirmation** envoyé après vérification email
-- ✅ **CGU obligatoires** à l'inscription — validation PHP + JS temps réel
-- ✅ **Système de traductions JSON** — `fr.json` / `en.json` (nom, emoji, tous les textes)
-- ✅ **Sélecteur de langue** dans la nav (landing + dashboard), persisté en cookie
-- ✅ **Dossiers v1/v2 supprimés** — utiliser des branches Git à la place
+| Fonctionnalité | Détails |
+|---|---|
+| **Notifications temps réel** | Bell dans le dashboard, badge unread, polling 60s, markAllRead |
+| **Annulation de RDV** | Client peut annuler depuis son dashboard (statuts new/in_progress) |
+| **Messagerie dashboard** | Inbox, envoi, lecture, badge non lus, notification admin |
+| **Devis & factures PDF** | Liste par client + génération HTML printable (PDF via Ctrl+P) |
+| **Page CGU** | `/cgu` — 9 sections légales, droit québécois |
+| **Page Politique** | `/politique` — Loi 25 Québec, 8 sections |
+| **Page Portfolio** | `/portfolio` — Projets avec hover overlay, tags, vidéo |
+| **Page Tarifs** | `/tarifs` — 3 formules + options supplémentaires |
+| **Blog** | `/blog` + `/blog/{slug}` — Articles dynamiques BDD |
+| **Témoignages** | Section homepage dynamique depuis BDD + données de démo |
+| **Compteurs animés** | 4 compteurs scroll-triggered sur la homepage |
+| **Admin Kanban** | Drag-and-drop statuts RDV avec sauvegarde AJAX |
+| **Admin Charts** | Donut répartition RDV + bar chart 7 jours (Chart.js) |
+| **Email admin** | Notification email à chaque admin pour nouveau RDV |
+| **Notification in-app** | Créée automatiquement lors d'un nouveau RDV (si connecté) |
+| **Mode clair/sombre** | Toggle dans nav landing + dashboard, persisté localStorage |
+| **Loader animé** | Bar de progression au premier chargement |
+| **404 personnalisée** | Page d'erreur avec liens utiles et design du site |
 
 ---
 
-## Structure
+## Structure complète
 
 ```
 sannastudio/
-├── index.php                    ← Point d'entrée unique
-├── defines.php                  ← Config BDD / mail / URL  ⚠️ ne pas committer
-├── defines.example.php          ← Modèle de config (sans credentials)
-├── .htaccess                    ← Réécriture d'URL
-├── .gitignore
-├── database.sql
+├── index.php / defines.php / .htaccess / database.sql
+├── .gitignore / defines.example.php
 │
 ├── languages/
-│   ├── fr.json                  ← Traductions françaises (155 clés)
-│   └── en.json                  ← Traductions anglaises  (155 clés)
+│   ├── fr.json   (155 clés)
+│   └── en.json   (155 clés)
 │
 ├── controllers/
-│   ├── Router.php               ← Routeur — initialise Lang::init()
-│   ├── Controller.php           ← Classe de base
+│   ├── Router.php                     ← 18 routes
+│   ├── Controller.php
 │   ├── ControllerHome.php
-│   ├── ControllerInscription.php
+│   ├── ControllerInscription.php      ← CGU obligatoires
 │   ├── ControllerConnexion.php
 │   ├── ControllerDeconnexion.php
 │   ├── ControllerDashboard.php
-│   ├── ControllerVerify.php     ← Envoie mail de confirmation après vérif
-│   ├── ControllerRdv.php        ← Formulaire RDV (AJAX POST)
+│   ├── ControllerVerify.php           ← Mail confirmation
+│   ├── ControllerRdv.php              ← Email admin + notif in-app
 │   ├── ControllerMotDePasseOublie.php
-│   └── ControllerResetPassword.php
+│   ├── ControllerResetPassword.php
+│   ├── ControllerAdmin.php            ← Kanban + charts + update-appt-status
+│   ├── ControllerMessages.php         ← Messagerie inbox/sent/send/read
+│   ├── ControllerNotifications.php    ← API JSON list + markread
+│   ├── ControllerInvoices.php         ← Liste + téléchargement PDF
+│   ├── ControllerAppointmentAction.php ← Annulation RDV client
+│   ├── ControllerBlog.php             ← Liste + article
+│   ├── ControllerPortfolio.php
+│   ├── ControllerTarifs.php
+│   ├── ControllerCgu.php
+│   └── ControllerPolitique.php
 │
 ├── models/
-│   ├── Lang.php                 ← Gestionnaire de traductions ← NOUVEAU
-│   ├── Mailer.php               ← SMTP robuste (réécrit v3)
-│   ├── User.php
-│   ├── UserManager.php
-│   ├── AppointmentManager.php
-│   ├── Session.php
-│   ├── Alert.php
-│   ├── functions.php
+│   ├── Lang.php                       ← Traductions JSON
+│   ├── Mailer.php                     ← +sendAdminNewRdv
+│   ├── User.php / UserManager.php
+│   ├── AppointmentManager.php         ← +updateStatus
+│   ├── NotificationManager.php        ← NOUVEAU
+│   ├── MessageManager.php             ← NOUVEAU
+│   ├── InvoiceManager.php             ← NOUVEAU
+│   ├── BlogManager.php                ← NOUVEAU
+│   ├── PortfolioManager.php           ← NOUVEAU
+│   ├── TestimonialManager.php         ← NOUVEAU
+│   ├── Session.php / Alert.php / functions.php
 │   └── Autoloader.php
 │
 ├── views/
-│   ├── View.php
-│   ├── landing/                 ← Site public
-│   │   ├── template.php         ← Nav + footer + sélecteur de langue
-│   │   ├── viewHome.php
-│   │   ├── viewInscription.php  ← CGU obligatoires
+│   ├── landing/
+│   │   ├── template.php               ← Loader + dark mode + lang + nav étendue
+│   │   ├── viewHome.php               ← +compteurs +témoignages
+│   │   ├── viewInscription.php        ← CGU obligatoires
 │   │   ├── viewConnexion.php
 │   │   ├── viewMotDePasseOublie.php
 │   │   ├── viewResetPassword.php
-│   │   └── viewError.php
-│   ├── dashboard/               ← Espace client
-│   │   ├── template.php
-│   │   ├── viewDashboard.php
+│   │   ├── viewError.php              ← 404 personnalisée
+│   │   ├── viewTarifs.php             ← NOUVEAU
+│   │   ├── viewPortfolio.php          ← NOUVEAU
+│   │   ├── viewBlog.php               ← NOUVEAU
+│   │   ├── viewBlogPost.php           ← NOUVEAU
+│   │   ├── viewCgu.php                ← NOUVEAU
+│   │   └── viewPolitique.php          ← NOUVEAU
+│   ├── dashboard/
+│   │   ├── template.php               ← Bell notifs + dark mode + messages badge
+│   │   ├── viewDashboard.php          ← +bouton annuler RDV
+│   │   ├── viewMessages.php           ← NOUVEAU
+│   │   ├── viewInvoices.php           ← NOUVEAU
 │   │   └── viewError.php
 │   └── admin/
+│       ├── template.php
+│       ├── viewAdminIndex.php         ← Charts Chart.js
+│       ├── viewAdminAppointments.php  ← Kanban drag-and-drop
+│       └── viewAdminUsers.php
 │
 └── assets/
-    ├── css/
-    │   ├── style.css            ← Site public (bug hero-visual corrigé)
-    │   ├── auth.css             ← Pages auth (bug hero-visual corrigé)
-    │   └── dashboard.css
-    ├── js/main.js
-    └── img/
+    ├── css/style.css                  ← +loader +dark mode +compteurs +témoignages
+    ├── css/auth.css
+    ├── css/dashboard.css
+    └── js/main.js
 ```
 
 ---
 
-## Installation sur Plesk
+## Installation
 
 ### 1. Base de données
 
-```sql
--- Dans Plesk → Bases de données → Créer "sannastudio"
--- Importer database.sql via phpMyAdmin
-```
-
-### 2. Upload des fichiers
-
-Uploader tout le contenu dans `httpdocs/` et vérifier que `mod_rewrite` est activé.
-
-### 3. Configurer defines.php
-
-Copier `defines.example.php` → `defines.php` et remplir :
-
-```php
-define('DB_NAME', 'sannastudio');
-define('DB_USER', 'votre_user_bdd');
-define('DB_PASS', 'votre_mdp_bdd');
-
-define('MAIL_HOST', 'mail.votredomaine.com');
-define('MAIL_PORT', 465);
-define('MAIL_USER', 'no-reply@votredomaine.com');
-define('MAIL_PASS', 'votre_mdp_mail');
-```
-
-### 4. Sécurité
-
-> ⚠️ **Ne jamais committer `defines.php`** — il est dans `.gitignore`.  
-> Utiliser des variables d'environnement Plesk ou un fichier hors du webroot.
-
----
-
-## Traductions
-
-### Utiliser dans une vue PHP
-
-```php
-Lang::t('nav.services')       // "Services" (fr) ou "Services" (en)
-Lang::t('hero.btn_primary')   // "Réserver maintenant" / "Book Now"
-Lang::t('auth.register_title') // "Créer un compte" / "Create an Account"
-```
-
-### Structure d'un fichier JSON
-
-```json
-{
-  "lang_name":  "Français",
-  "lang_emoji": "🇫🇷",
-  "lang_code":  "fr",
-  "nav": {
-    "services": "Services",
-    "rdv":      "Prendre RDV"
-  },
-  "hero": {
-    "btn_primary": "Réserver maintenant"
-  }
-}
-```
-
-### Ajouter une nouvelle langue
-
-1. Copier `languages/fr.json` → `languages/es.json`
-2. Traduire toutes les valeurs
-3. Ajouter `'es'` dans le tableau `$available` de `models/Lang.php`
-
-### Changer la langue
-
-Via URL (persisté en cookie 1 an) :
-
-```
-https://sannastudio.ca/?lang=en
-https://sannastudio.ca/dashboard?lang=fr
-```
-
----
-
-## Routes
-
-| URL | Méthode | Contrôleur | Description |
-|-----|---------|------------|-------------|
-| `/` | GET | ControllerHome | Page d'accueil |
-| `/inscription` | GET/POST | ControllerInscription | Création de compte (CGU obligatoires) |
-| `/connexion` | GET/POST | ControllerConnexion | Connexion |
-| `/deconnexion` | GET | ControllerDeconnexion | Déconnexion |
-| `/dashboard` | GET | ControllerDashboard | Espace client (auth requis) |
-| `/verify?token=…` | GET | ControllerVerify | Vérification email + mail de confirmation |
-| `/rdv` | POST | ControllerRdv | Formulaire RDV (AJAX JSON) |
-| `/mot-de-passe-oublie` | GET/POST | ControllerMotDePasseOublie | Reset step 1 |
-| `/reset-password?token=…` | GET/POST | ControllerResetPassword | Reset step 2 |
-
----
-
-## Flux d'inscription
-
-```
-1. Client remplit le formulaire + coche CGU + Politique
-2. Validation PHP (champs, CGU, email unique)
-3. Compte créé en BDD → email_verified = 0
-4. Email de bienvenue envoyé (lien /verify?token=…)
-5. Client clique le lien → email_verified = 1
-6. Email de confirmation "Compte activé" envoyé
-7. Client peut se connecter → accès /dashboard
-```
-
----
-
-## Emails envoyés
-
-| Déclencheur | Méthode Mailer | Sujet |
-|-------------|----------------|-------|
-| Inscription | `sendWelcome()` | Bienvenue — Confirmez votre email |
-| Vérification email | `sendAccountConfirmed()` | Votre compte est activé ✔ |
-| Mot de passe oublié | `sendResetPassword()` | Réinitialisation du mot de passe |
-| Demande de RDV | `sendAppointmentConfirm()` | Votre demande de RDV |
-
----
-
-## Versioning
-
-Ne plus créer de dossiers `v1/`, `v2/`… dans le repo.  
-Utiliser des **branches Git** :
-
 ```bash
-git checkout -b feature/ma-fonctionnalite
-git checkout -b fix/bug-css
-git tag v3.0.0
+# Importer database.sql via phpMyAdmin
+# Contient toutes les tables dont les nouvelles :
+# messages, invoices, notifications, blog_posts, testimonials, portfolio
+```
+
+### 2. Configuration defines.php
+
+Copier `defines.example.php` → `defines.php` et remplir BDD + SMTP.
+
+### 3. Routes disponibles
+
+| URL | Description |
+|-----|-------------|
+| `/` | Homepage (compteurs + témoignages) |
+| `/inscription` | Compte (CGU obligatoires) |
+| `/connexion` | Connexion |
+| `/dashboard` | Espace client |
+| `/messages` | Messagerie client |
+| `/invoices` | Devis & factures |
+| `/notifications` | API JSON notifications |
+| `/appointment-action/{id}/cancel` | Annuler un RDV |
+| `/tarifs` | Grille tarifaire |
+| `/portfolio` | Réalisations |
+| `/blog` | Articles |
+| `/blog/{slug}` | Article |
+| `/cgu` | CGU |
+| `/politique` | Politique de confidentialité |
+| `/admin` | Dashboard admin |
+| `/admin/appointments` | Kanban RDV |
+| `/admin/users` | Liste clients |
+| `/admin/update-appt-status` | API AJAX statut RDV |
+| `?lang=fr\|en` | Changer la langue |
+
+---
+
+## Ajouter du contenu
+
+### Témoignage
+```sql
+INSERT INTO testimonials (name, role, content, rating) VALUES
+('Prénom Nom', 'Rôle — Ville', 'Texte du témoignage.', 5);
+```
+
+### Article de blog
+```sql
+INSERT INTO blog_posts (title, slug, excerpt, content, published, published_at) VALUES
+('Mon titre', 'mon-titre', 'Résumé court.', 'Contenu complet...', 1, NOW());
+```
+
+### Projet portfolio
+```sql
+INSERT INTO portfolio (title, description, category, cover_url, tags) VALUES
+('Nom du projet', 'Description.', 'Événementiel', 'https://...image.jpg', 'live,youtube');
+```
+
+### Facture client (admin)
+```sql
+INSERT INTO invoices (user_id, number, type, amount, status, notes, issued_at) VALUES
+(1, 'SSP-2026-0001', 'devis', 1200.00, 'sent', 'Webdiffusion événementielle', CURDATE());
 ```

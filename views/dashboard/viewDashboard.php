@@ -69,6 +69,22 @@ $inprog    = count(array_filter($appointments, fn($a) => $a->getStatus() === 'in
     </a>
 </div>
 
+<script>
+const CSRF_DB = '<?= functions::csrfToken() ?>';
+const SURL_DB = '<?= SITE_URL ?>';
+function cancelRdv(id) {
+    if (!confirm('Annuler cette demande de RDV ?')) return;
+    const fd = new FormData();
+    fd.append('csrf_token', CSRF_DB);
+    fetch(SURL_DB + '/appointment-action/' + id + '/cancel', { method:'POST', body:fd })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) { location.reload(); }
+            else { alert(d.error || 'Erreur'); }
+        });
+}
+</script>
+
 <!-- ══ GRID : RDVs + Compte ══ -->
 <div class="db-grid-2">
 

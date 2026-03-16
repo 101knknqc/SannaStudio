@@ -247,64 +247,97 @@ const STEPS = [
 
 
 function initProcessTimeline() {
-  const container = document.getElementById('process-scroll-container');
-  const fill      = document.getElementById('ptlFill');
-  const dot       = document.getElementById('ptlDot');
-  const card      = document.getElementById('ptlCard');
-  const cardNum   = document.getElementById('ptlCardNum');
-  const cardTitle = document.getElementById('ptlCardTitle');
-  const cardDesc  = document.getElementById('ptlCardDesc');
-  const cardDets  = document.getElementById('ptlCardDetails');
-  const stepEls   = document.querySelectorAll('.ptl-step');
+  const container  = document.getElementById('process-scroll-container');
+  const fill       = document.getElementById('ptlFill');
+  const dot        = document.getElementById('ptlDot');
+  const card       = document.getElementById('ptlCard');
+  const cardNum    = document.getElementById('ptlCardNum');
+  const cardTitle  = document.getElementById('ptlCardTitle');
+  const cardDesc   = document.getElementById('ptlCardDesc');
+  const cardDets   = document.getElementById('ptlCardDetails');
+  const stepEls    = document.querySelectorAll('.ptl-step');
+  const scrollBar  = document.getElementById('processScrollBar');
 
   if (!container) return;
 
+  const N = STEPS.length; // 4
   let lastStep = -1;
+  let rafId = null;
+  let currentPct = 0; // pour l'animation fluide
 
+  // ── Mettre à jour l'étape affichée ──
   function setStep(idx) {
     if (idx === lastStep) return;
     lastStep = idx;
-
     const step = STEPS[idx];
 
-    // Update step markers
     stepEls.forEach((el, i) => {
       el.classList.remove('active', 'done');
       if (i < idx)  el.classList.add('done');
       if (i === idx) el.classList.add('active');
     });
 
-    // Update card with fade
-    card.classList.remove('open');
-    setTimeout(() => {
-      cardNum.textContent   = step.num;
-      cardTitle.textContent = step.title;
-      cardDesc.textContent  = step.desc;
-      cardDets.innerHTML    = step.details.map(d => `<li><span class='ptl-box-icon'>${d.icon}</span><span class='ptl-box-text'><strong>${d.label}</strong><em>${d.sub}</em></span></li>`).join('');
+    // Transition fluide de la card : fade out → swap → fade in
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(10px)';
+    clearTimeout(card._swapTimer);
+    card._swapTimer = setTimeout(() => {
+      if (cardNum)   cardNum.textContent   = step.num;
+      if (cardTitle) cardTitle.textContent = step.title;
+      if (cardDesc)  cardDesc.textContent  = step.desc;
+      if (cardDets)  cardDets.innerHTML    = step.details.map(d =>
+        `<li>
+          <span class="ptl-box-icon">${d.icon}</span>
+          <span class="ptl-box-text">
+            <strong>${d.label}</strong>
+            <em>${d.sub}</em>
+          </span>
+        </li>`
+      ).join('');
       card.classList.add('open');
-    }, 120);
+      // Re-afficher avec transition
+      requestAnimationFrame(() => {
+        card.style.transition = 'opacity .35s ease, transform .35s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      });
+    }, 160);
   }
 
-  function onScroll() {
+  // ── Calcul du progrès depuis la position scroll ──
+  function getProgress() {
     const rect  = container.getBoundingClientRect();
     const total = container.offsetHeight - window.innerHeight;
-    // progress 0→1 as the container scrolls through
-    const progress = Math.min(1, Math.max(0, -rect.top / total));
-
-    // Line fill + dot position
-    const pct = progress * 100;
-    fill.style.width = pct + '%';
-    dot.style.left   = pct + '%';
-
-    // Which step? 4 zones: 0-25%, 25-50%, 50-75%, 75-100%
-    const stepIdx = Math.min(3, Math.floor(progress * 4));
-    setStep(stepIdx);
+    return Math.min(1, Math.max(0, -rect.top / total));
   }
 
-  // Init
+  // ── Boucle RAF pour animation fluide ──
+  function animateFrame() {
+    const targetPct = getProgress() * 100;
+    // Lerp vers la cible (fluidité)
+    currentPct += (targetPct - currentPct) * 0.12;
+    if (Math.abs(targetPct - currentPct) < 0.05) currentPct = targetPct;
+
+    // Line fill + dot
+    if (fill) fill.style.width = currentPct + '%';
+    if (dot)  dot.style.left   = currentPct + '%';
+
+    // Barre de progression en bas
+    if (scrollBar) scrollBar.style.width = currentPct + '%';
+
+    // Quelle étape ? zones égales
+    const stepIdx = Math.min(N - 1, Math.floor((currentPct / 100) * N));
+    setStep(stepIdx);
+
+    rafId = requestAnimationFrame(animateFrame);
+  }
+
+  // ── Démarrage ──
   setStep(0);
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  card.style.opacity = '1';
+  card.style.transform = 'translateY(0)';
+  card.classList.add('open');
+  animateFrame(); // RAF tourne en continu
 }
 
 document.addEventListener('DOMContentLoaded', () => {

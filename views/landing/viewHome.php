@@ -96,6 +96,28 @@
             <span class="ticker-item">Encodeurs & Régie</span>
             <span class="ticker-sep">✦</span>
         </div>
+
+
+    <!-- ══ COMPTEURS ══ -->
+    <div class="counter-section reveal">
+        <div class="counter-grid">
+            <div class="counter-item">
+                <div class="counter-num" data-counter data-target="150" data-suffix="+">150+</div>
+                <div class="counter-label">Événements diffusés</div>
+            </div>
+            <div class="counter-item">
+                <div class="counter-num" data-counter data-target="500" data-suffix="h">500h</div>
+                <div class="counter-label">Heures de diffusion</div>
+            </div>
+            <div class="counter-item">
+                <div class="counter-num" data-counter data-target="5" data-suffix="+">5+</div>
+                <div class="counter-label">Plateformes simultanées</div>
+            </div>
+            <div class="counter-item">
+                <div class="counter-num" data-counter data-target="98" data-suffix="%">98%</div>
+                <div class="counter-label">Clients satisfaits</div>
+            </div>
+        </div>
     </div>
 
     <!-- ══ SERVICES ══ -->
@@ -207,6 +229,7 @@
     <!-- ══ PROCESS ══ -->
     <div id="process-scroll-container">
         <div id="process-sticky">
+            <div class="process-scroll-bar" id="processScrollBar"></div>
             <section id="process">
                 <p class="section-label">// 02 — Comment ça marche</p>
                 <h2 class="section-title">Notre <span>Processus</span></h2>

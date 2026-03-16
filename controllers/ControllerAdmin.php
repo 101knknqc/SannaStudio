@@ -7,6 +7,28 @@ class ControllerAdmin extends Controller {
         $am  = new AppointmentManager();
         $sub = $url[1] ?? 'index';
 
+        // Action AJAX : changer statut RDV (admin)
+        if ($sub === 'update-appt-status' && functions::isPost()) {
+            header('Content-Type: application/json');
+            if (!functions::verifyCsrf()) { echo json_encode(['success'=>false]); exit; }
+            $id     = (int)functions::post('id');
+            $status = trim(functions::post('status'));
+            $allowed = ['new','in_progress','completed','cancelled'];
+            if (!in_array($status, $allowed)) { echo json_encode(['success'=>false,'error'=>'Statut invalide']); exit; }
+            $am->updateStatus($id, $status);
+            // Notifier le client
+            $appts = $am->getRecent(200);
+            foreach ($appts as $a) {
+                if ($a->getId() === $id && $a->getUserId()) {
+                    $nm = new NotificationManager();
+                    $labels = ['new'=>'En attente','in_progress'=>'En cours','completed'=>'Terminé','cancelled'=>'Annulé'];
+                    $nm->create($a->getUserId(), 'rdv', 'Statut RDV mis à jour', 'Votre RDV est maintenant : '.$labels[$status], SITE_URL.'/dashboard');
+                    break;
+                }
+            }
+            echo json_encode(['success'=>true]); exit;
+        }
+
         switch ($sub) {
             case 'users':
                 $this->setView('AdminUsers', [

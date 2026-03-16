@@ -1636,26 +1636,58 @@ footer {
 ══════════════════════════════════════ */
 
 /* Outer container — tall enough to scroll through 4 steps */
+/* ══════════════════════════════════════════
+   PROCESS — STICKY FULLSCREEN SCROLL
+   container = 500vh → 4 étapes × 100vh + 100vh intro
+   L'écran est "bloqué" pendant tout le scroll
+══════════════════════════════════════════ */
 #process-scroll-container {
   height: 500vh;
   position: relative;
 }
 
-/* Sticky wrapper — stays on screen while scrolling through container */
+/* Le wrapper sticky prend TOUT l'écran */
 #process-sticky {
   position: sticky;
   top: 0;
   height: 100vh;
   overflow: hidden;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   background: var(--black);
+  /* Overlay de progression visuelle */
+  isolation: isolate;
+}
+
+/* Indicateur de scroll en bas */
+#process-sticky::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(123,47,190,.2);
+  z-index: 2;
+}
+
+.process-scroll-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--purple);
+  box-shadow: 0 0 12px rgba(123,47,190,.7);
+  transition: width .08s linear;
+  z-index: 3;
 }
 
 #process-sticky #process {
-  padding-top: 60px;
-  padding-bottom: 60px;
+  padding-top: 0;
+  padding-bottom: 0;
   width: 100%;
+  padding: 0 5%;
 }
 
 /* ── Timeline track ── */
@@ -1936,7 +1968,7 @@ footer {
 }
 
 @media (max-width: 600px) {
-  /* ── Process : désactiver le sticky scroll sur mobile, afficher en vertical ── */
+  /* ── Process : sticky désactivé sur mobile → cartes verticales ── */
   #process-scroll-container {
     height: auto !important;
   }
@@ -1946,20 +1978,24 @@ footer {
     height: auto !important;
     min-height: unset !important;
     overflow: visible !important;
-    align-items: flex-start;
+    justify-content: flex-start;
   }
+
+  #process-sticky::after { display: none; }
+  .process-scroll-bar { display: none !important; }
 
   #process-sticky #process {
     padding-top: 80px;
     padding-bottom: 60px;
+    padding-left: 4%;
+    padding-right: 4%;
   }
 
-  /* Timeline track : masquer l'animation scroll sur mobile */
-  .process-timeline {
-    display: none;
-  }
+  /* Masquer desktop timeline et card sur mobile */
+  .process-timeline,
+  .ptl-card { display: none !important; }
 
-  /* Afficher les 4 étapes en cartes verticales empilées */
+  /* Afficher les cartes empilées */
   .ptl-steps-mobile {
     display: flex;
     flex-direction: column;
@@ -3663,4 +3699,389 @@ footer {
 .lang-flag {
   font-size: 16px;
   line-height: 1;
+}
+
+/* ══════════════════════════════════════════
+   LOADER ANIMÉ
+══════════════════════════════════════════ */
+#page-loader {
+  position: fixed;
+  inset: 0;
+  background: var(--black);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 24px;
+  transition: opacity .4s ease, visibility .4s ease;
+}
+
+#page-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-logo {
+  font-family: 'Oswald', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: var(--white);
+  text-transform: uppercase;
+}
+
+.loader-logo span { color: var(--purple); }
+
+.loader-bar-wrap {
+  width: 200px;
+  height: 2px;
+  background: rgba(123,47,190,.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loader-bar {
+  height: 100%;
+  background: linear-gradient(to right, var(--purple-dark), var(--purple), var(--purple-light));
+  border-radius: 2px;
+  animation: loader-fill .9s cubic-bezier(.4,0,.2,1) forwards;
+  box-shadow: 0 0 12px rgba(123,47,190,.6);
+}
+
+@keyframes loader-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* ══════════════════════════════════════════
+   DARK MODE (landing)
+══════════════════════════════════════════ */
+body.light-mode {
+  --black: #f5f5f5;
+  --dark: #ebebeb;
+  --card-bg: #fff;
+  --white: #111;
+  --gray: #555;
+  --border: rgba(123,47,190,.2);
+  background: #f5f5f5;
+  color: #111;
+}
+
+body.light-mode nav {
+  background: rgba(245,245,245,.95);
+}
+
+.dark-toggle-landing {
+  background: rgba(123,47,190,.1);
+  border: 1px solid rgba(123,47,190,.3);
+  color: #aaa;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.dark-toggle-landing:hover {
+  border-color: var(--purple);
+  color: var(--white);
+}
+
+.dark-toggle-landing svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ══════════════════════════════════════════
+   COMPTEURS ANIMÉS
+══════════════════════════════════════════ */
+.counter-section {
+  padding: 80px 5%;
+  background: var(--dark);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.counter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.counter-item {
+  text-align: center;
+  padding: 32px 24px;
+  border-right: 1px solid var(--border);
+}
+
+.counter-item:last-child { border-right: none; }
+
+.counter-num {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 700;
+  color: var(--purple);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.counter-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--gray);
+  text-transform: uppercase;
+}
+
+@media (max-width: 600px) {
+  .counter-grid { grid-template-columns: repeat(2, 1fr); }
+  .counter-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .counter-item:nth-child(odd) { border-right: 1px solid var(--border); }
+  .counter-item:nth-child(3), .counter-item:nth-child(4) { border-bottom: none; }
+}
+
+/* ══════════════════════════════════════════
+   TÉMOIGNAGES
+══════════════════════════════════════════ */
+#testimonials {
+  background: var(--dark);
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.testimonial-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color .3s, transform .3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.testimonial-card::before {
+  content: '"';
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 80px;
+  color: rgba(123,47,190,.08);
+  line-height: 1;
+}
+
+.testimonial-card:hover {
+  border-color: var(--purple);
+  transform: translateY(-4px);
+}
+
+.testimonial-stars {
+  display: flex;
+  gap: 4px;
+  color: #f59e0b;
+  font-size: 16px;
+}
+
+.testimonial-text {
+  color: #bbb;
+  font-size: 15px;
+  line-height: 1.75;
+  flex: 1;
+  font-style: italic;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.testimonial-photo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(123,47,190,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--purple-light);
+  flex-shrink: 0;
+  border: 2px solid var(--border);
+}
+
+.testimonial-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.testimonial-role {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--gray);
+  letter-spacing: 1px;
+}
+
+@media (max-width: 900px) {
+  .testimonials-grid { grid-template-columns: 1fr; max-width: 500px; }
+}
+
+/* ══════════════════════════════════════════
+   NAV DARK TOGGLE
+══════════════════════════════════════════ */
+.nav-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ══════════════════════════════════════════
+   NAV — dropdown "Plus"
+══════════════════════════════════════════ */
+.nav-more-wrap {
+  position: relative;
+}
+
+.nav-more-btn {
+  background: none;
+  border: none;
+  color: var(--white);
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color .2s;
+}
+
+.nav-more-btn:hover {
+  color: var(--purple-light);
+}
+
+.nav-more-dropdown {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,10,10,.97);
+  border: 1px solid rgba(123,47,190,.3);
+  border-radius: 4px;
+  min-width: 160px;
+  overflow: hidden;
+  display: none;
+  z-index: 2000;
+  box-shadow: 0 12px 32px rgba(0,0,0,.6);
+  backdrop-filter: blur(12px);
+}
+
+.nav-more-dropdown.open {
+  display: block;
+  animation: fadeIn .15s ease;
+}
+
+.nav-more-dropdown a {
+  display: block;
+  padding: 11px 18px;
+  color: #bbb;
+  text-decoration: none;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: background .15s, color .15s;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+
+.nav-more-dropdown a:last-child {
+  border-bottom: none;
+}
+
+.nav-more-dropdown a:hover {
+  background: rgba(123,47,190,.12);
+  color: var(--white);
+}
+
+/* ══════════════════════════════════════════
+   LOADER — Logo SSP image
+══════════════════════════════════════════ */
+.loader-ssp-img {
+  width: 100px;
+  height: auto;
+  filter: brightness(0) invert(1);
+  opacity: .9;
+  animation: loader-pulse 1.2s ease-in-out infinite;
+}
+
+.loader-version {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: rgba(123,47,190,.7);
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+@keyframes loader-pulse {
+  0%, 100% { opacity: .6; transform: scale(1); }
+  50%       { opacity: 1;  transform: scale(1.04); }
+}
+
+/* ══════════════════════════════════════════
+   LOGO SSP — Adaptive color
+   ssp-logo.png = noir sur fond transparent
+   • Fond sombre (défaut) → brightness(0) invert(1) → blanc
+   • Fond clair (light-mode) → brightness(0) → noir
+══════════════════════════════════════════ */
+
+/* Logo blanc par défaut (fond sombre) */
+.ssp-logo {
+  filter: brightness(0) invert(1);
+  transition: filter .3s ease;
+  display: block;
+}
+
+/* Logo noir en mode clair */
+body.light-mode .ssp-logo {
+  filter: brightness(0);
+}
+
+/* Logo avec glow violet */
+.ssp-logo-glow {
+  filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(123,47,190,0.55));
+  transition: filter .3s ease;
+  display: block;
+}
+
+body.light-mode .ssp-logo-glow {
+  filter: brightness(0) drop-shadow(0 0 8px rgba(123,47,190,0.4));
+}
+
+/* Loader logo — toujours blanc (fond du loader est noir) */
+.loader-ssp-img {
+  filter: brightness(0) invert(1);
+  animation: loader-pulse 1.2s ease-in-out infinite;
 }

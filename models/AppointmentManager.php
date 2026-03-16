@@ -79,6 +79,10 @@ class AppointmentManager extends Model {
     }
 
 
+    public function updateStatus(int $id, string $status): void {
+        $this->getDb()->prepare("UPDATE `{$this->_table}` SET status=? WHERE id=?")->execute([$status,$id]);
+    }
+
     public function countAll(): int {
         return (int)$this->getDb()->query("SELECT COUNT(*) FROM `{$this->_table}`")->fetchColumn();
     }}

@@ -6,7 +6,34 @@ class Mailer {
         $path = PATH_MODELS.'/../assets/img/logo-white.png';
         if (file_exists($path)) {
             return base64_encode(file_get_contents($path));
-        }
+        
+    public static function sendAdminNewRdv(User $admin, string $clientName, string $clientEmail, string $service, string $date, string $message): bool {
+        $prenom = htmlspecialchars($admin->getFirstName());
+        $html = self::wrap(
+            self::header('Nouvelle demande de RDV').
+            '<div style="padding:36px 36px 28px">
+                <h2 style="margin:0 0 12px;color:#9B4FDE;font-size:20px">📅 Nouvelle demande reçue</h2>
+                <p style="color:#ccc;font-size:14px;line-height:1.8">Bonjour '.$prenom.',<br>Une nouvelle demande de rendez-vous vient d'être soumise.</p>
+                <div style="background:rgba(123,47,190,.08);border:1px solid rgba(123,47,190,.2);border-radius:8px;padding:20px;margin:20px 0">
+                    <table style="width:100%;font-family:Arial,sans-serif;font-size:13px;border-collapse:collapse">
+                        <tr><td style="color:#888;padding:6px 0;width:130px">Client</td><td style="color:#fff;font-weight:bold">'.htmlspecialchars($clientName).'</td></tr>
+                        <tr><td style="color:#888;padding:6px 0">Email</td><td style="color:#fff">'.htmlspecialchars($clientEmail).'</td></tr>
+                        <tr><td style="color:#888;padding:6px 0">Service</td><td style="color:#9B4FDE;font-weight:bold">'.htmlspecialchars($service).'</td></tr>
+                        <tr><td style="color:#888;padding:6px 0">Date souhaitée</td><td style="color:#fff">'.htmlspecialchars($date ?: '—').'</td></tr>
+                        <tr><td style="color:#888;padding:6px 0;vertical-align:top">Message</td><td style="color:#ccc">'.nl2br(htmlspecialchars(mb_substr($message,0,300))).(mb_strlen($message)>300?'…':'').'</td></tr>
+                    </table>
+                </div>
+                <div style="text-align:center;margin-top:20px">
+                    <a href="'.SITE_URL.'/admin/appointments" style="background:#7B2FBE;color:#fff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:14px;font-weight:bold;display:inline-block">
+                        Gérer les RDV →
+                    </a>
+                </div>
+            </div>'.
+            self::footer()
+        );
+        return self::smtp($admin->getEmail(), $admin->getFullName(), '[SannaStudio] Nouvelle demande de RDV — '.$clientName, $html);
+    }
+}
         return '';
     }
 
@@ -279,4 +306,31 @@ class Mailer {
 
         return self::smtp($email, $name, 'Votre demande de RDV — SannaStudio', $html);
     }
+    public static function sendAdminNewRdv(User $admin, string $clientName, string $clientEmail, string $service, string $date, string $message): bool {
+        $prenom = htmlspecialchars($admin->getFirstName());
+        $html = self::wrap(
+            self::header('Nouvelle demande de RDV').
+            '<div style="padding:36px 36px 28px">
+                <h2 style="margin:0 0 12px;color:#9B4FDE;font-size:20px">📅 Nouvelle demande reçue</h2>
+                <p style="color:#ccc;font-size:14px;line-height:1.8">Bonjour '.$prenom.',<br>Une nouvelle demande de rendez-vous vient d'être soumise.</p>
+                <div style="background:rgba(123,47,190,.08);border:1px solid rgba(123,47,190,.2);border-radius:8px;padding:20px;margin:20px 0">
+                    <table style="width:100%;font-family:Arial,sans-serif;font-size:13px;border-collapse:collapse">
+                        <tr><td style="color:#888;padding:6px 0;width:130px">Client</td><td style="color:#fff;font-weight:bold">'.htmlspecialchars($clientName).'</td></tr>
+                        <tr><td style="color:#888;padding:6px 0">Email</td><td style="color:#fff">'.htmlspecialchars($clientEmail).'</td></tr>
+                        <tr><td style="color:#888;padding:6px 0">Service</td><td style="color:#9B4FDE;font-weight:bold">'.htmlspecialchars($service).'</td></tr>
+                        <tr><td style="color:#888;padding:6px 0">Date souhaitée</td><td style="color:#fff">'.htmlspecialchars($date ?: '—').'</td></tr>
+                        <tr><td style="color:#888;padding:6px 0;vertical-align:top">Message</td><td style="color:#ccc">'.nl2br(htmlspecialchars(mb_substr($message,0,300))).(mb_strlen($message)>300?'…':'').'</td></tr>
+                    </table>
+                </div>
+                <div style="text-align:center;margin-top:20px">
+                    <a href="'.SITE_URL.'/admin/appointments" style="background:#7B2FBE;color:#fff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:14px;font-weight:bold;display:inline-block">
+                        Gérer les RDV →
+                    </a>
+                </div>
+            </div>'.
+            self::footer()
+        );
+        return self::smtp($admin->getEmail(), $admin->getFullName(), '[SannaStudio] Nouvelle demande de RDV — '.$clientName, $html);
+    }
+
 }

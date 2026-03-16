@@ -94,7 +94,7 @@
 
 <aside class="db-sidebar" id="dbSidebar">
     <a href="<?= SITE_URL ?>" class="db-sidebar-logo">
-        <img src="<?= SITE_URL ?>/assets/img/logo-white.png" alt="SannaStudio">
+        <img src="<?= SITE_URL ?>/assets/img/logo-white.png" alt="SSP">
         <span>SannaStudio</span>
     </a>
 

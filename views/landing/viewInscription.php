@@ -1,6 +1,6 @@
 <div class="auth-page">
     <div class="auth-card">
-        <img src="<?= SITE_URL ?>/assets/img/logo-white.png" alt="SannaStudio" class="auth-logo">
+        <img src="<?= SITE_URL ?>/assets/img/logo-white.png" alt="SSP" class="auth-logo" style="height:50px;width:auto">
         <h1 class="auth-title"><?= Lang::t('auth.register_title') ?></h1>
         <p class="auth-sub"><?= Lang::t('auth.register_sub') ?></p>
 

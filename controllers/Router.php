@@ -5,15 +5,12 @@ require_once('Controller.php');
 
 class Router {
     public function routeReq(): void {
-        // Autoload models
         spl_autoload_register(function($class) {
             $f = PATH_MODELS.'/'.$class.'.php';
             if (file_exists($f)) require_once $f;
         });
 
         Session::start();
-
-        // Initialiser le système de traductions
         Lang::init();
 
         try {
@@ -22,24 +19,34 @@ class Router {
             $page     = strtolower($segments[0] ?? 'home');
 
             $map = [
-                ''                    => 'ControllerHome',
-                'home'                => 'ControllerHome',
-                'admin'               => 'ControllerAdmin',
-                'inscription'         => 'ControllerInscription',
-                'connexion'           => 'ControllerConnexion',
-                'deconnexion'         => 'ControllerDeconnexion',
-                'dashboard'           => 'ControllerDashboard',
-                'verify'              => 'ControllerVerify',
-                'rdv'                 => 'ControllerRdv',
-                'reset-password'      => 'ControllerResetPassword',
-                'mot-de-passe-oublie' => 'ControllerMotDePasseOublie',
+                ''                      => 'ControllerHome',
+                'home'                  => 'ControllerHome',
+                'admin'                 => 'ControllerAdmin',
+                'inscription'           => 'ControllerInscription',
+                'connexion'             => 'ControllerConnexion',
+                'deconnexion'           => 'ControllerDeconnexion',
+                'dashboard'             => 'ControllerDashboard',
+                'verify'                => 'ControllerVerify',
+                'rdv'                   => 'ControllerRdv',
+                'reset-password'        => 'ControllerResetPassword',
+                'mot-de-passe-oublie'   => 'ControllerMotDePasseOublie',
+                // Nouvelles routes v4
+                'messages'              => 'ControllerMessages',
+                'notifications'         => 'ControllerNotifications',
+                'invoices'              => 'ControllerInvoices',
+                'blog'                  => 'ControllerBlog',
+                'portfolio'             => 'ControllerPortfolio',
+                'tarifs'                => 'ControllerTarifs',
+                'cgu'                   => 'ControllerCgu',
+                'politique'             => 'ControllerPolitique',
+                'appointment-action'    => 'ControllerAppointmentAction',
             ];
 
             $controllerClass = $map[$page] ?? null;
             if (!$controllerClass) throw new Exception("404 — Page introuvable");
 
             $controllerFile = __DIR__.'/'.$controllerClass.'.php';
-            if (!file_exists($controllerFile)) throw new Exception("404 — Contrôleur manquant");
+            if (!file_exists($controllerFile)) throw new Exception("404 — Contrôleur manquant : $controllerClass");
 
             require_once($controllerFile);
             new $controllerClass($segments);

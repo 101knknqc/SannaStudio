@@ -43,6 +43,20 @@ class ControllerRdv extends Controller {
 
         Mailer::sendAppointmentConfirm($email, $nom, $service, $date);
 
+        // Notifier tous les admins par email
+        $um = new UserManager();
+        foreach ($um->getAll() as $admin) {
+            if ($admin->isAdmin()) {
+                Mailer::sendAdminNewRdv($admin, $nom, $email, $service, $date, $message);
+            }
+        }
+
+        // Notification in-app si user connecté
+        if (Session::isLoggedIn()) {
+            $nm = new NotificationManager();
+            $nm->create(Session::getUserId(), 'rdv', 'Demande de RDV envoyée', 'Votre demande pour '.$service.' a bien été reçue.', SITE_URL.'/dashboard');
+        }
+
         $log = date('Y-m-d H:i:s')." | $nom | $email | $service | $date\n";
         @file_put_contents(__DIR__.'/../rdv_log.txt', $log, FILE_APPEND | LOCK_EX);
 
