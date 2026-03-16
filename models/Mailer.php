@@ -42,22 +42,26 @@ class Mailer {
         </div></body></html>';
     }
 
-    // ── SMTP ─────────────────────────────────────────────────────────
+    // ── SMTP robuste ─────────────────────────────────────────────────
     private static function smtp(string $to, string $toName, string $subject, string $html): bool {
-        $host = MAIL_HOST; $port = MAIL_PORT;
-        $user = MAIL_USER; $pass = MAIL_PASS;
-        $from = MAIL_FROM; $fromName = MAIL_FROM_NAME;
+        $host     = MAIL_HOST;
+        $port     = MAIL_PORT;
+        $user     = MAIL_USER;
+        $pass     = MAIL_PASS;
+        $from     = MAIL_FROM;
+        $fromName = MAIL_FROM_NAME;
 
         $boundary = md5(uniqid());
         $text = strip_tags(str_replace(['<br>','<br/>','<br />'], "\n", $html));
 
+        // ── Construire les headers ──
         $headers  = "Date: ".date('r')."\r\n";
         $headers .= "From: =?UTF-8?B?".base64_encode($fromName)."?= <$from>\r\n";
         $headers .= "To: =?UTF-8?B?".base64_encode($toName)."?= <$to>\r\n";
         $headers .= "Subject: =?UTF-8?B?".base64_encode($subject)."?=\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: multipart/alternative; boundary=\"$boundary\"\r\n";
-        $headers .= "X-Mailer: SannaStudio/1.0\r\n";
+        $headers .= "X-Mailer: SannaStudio/2.0\r\n";
 
         $body  = "--$boundary\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n";
         $body .= chunk_split(base64_encode($text))."\r\n";
@@ -65,49 +69,77 @@ class Mailer {
         $body .= chunk_split(base64_encode($html))."\r\n";
         $body .= "--$boundary--\r\n";
 
+        // ── Connexion SSL (port 465) ──
         $ctx = stream_context_create(['ssl' => [
-            'verify_peer'=>false,'verify_peer_name'=>false,'allow_self_signed'=>true
+            'verify_peer'       => false,
+            'verify_peer_name'  => false,
+            'allow_self_signed' => true,
         ]]);
 
-        $sock = @stream_socket_client("ssl://$host:$port", $errno, $errstr, 15, STREAM_CLIENT_CONNECT, $ctx);
-        if (!$sock) { error_log("[Mailer] Connect failed: $errstr"); return false; }
-        stream_set_timeout($sock, 10);
+        $sock = @stream_socket_client(
+            "ssl://$host:$port",
+            $errno, $errstr, 20,
+            STREAM_CLIENT_CONNECT,
+            $ctx
+        );
 
-        $read = function() use ($sock): string {
+        if (!$sock) {
+            error_log("[Mailer] Connexion échouée vers $host:$port — $errstr ($errno)");
+            return false;
+        }
+
+        stream_set_timeout($sock, 15);
+
+        // ── Helpers lecture / écriture ──
+        $readAll = function() use ($sock): string {
             $buf = '';
             while (!feof($sock)) {
                 $line = fgets($sock, 512);
                 if ($line === false) break;
                 $buf .= $line;
+                // Dernière ligne du bloc SMTP : le 4e caractère est un espace
                 if (strlen($line) >= 4 && $line[3] === ' ') break;
             }
             return $buf;
         };
-        $send = function(string $cmd) use ($sock, $read): string {
-            fwrite($sock, $cmd."\r\n"); return $read();
+
+        $send = function(string $cmd) use ($sock, $readAll): string {
+            fwrite($sock, $cmd."\r\n");
+            return $readAll();
         };
 
-        $read(); // banner
-        $send("EHLO $host");
+        // ── Dialogue SMTP ──
+        $readAll(); // Bannière de bienvenue
+
+        // EHLO avec hostname local (pas le host distant)
+        $ehloHost = gethostname() ?: 'localhost';
+        $ehloResp = $send("EHLO $ehloHost");
+
+        // AUTH LOGIN
         $send("AUTH LOGIN");
         $send(base64_encode($user));
-        $r = $send(base64_encode($pass));
+        $authResp = $send(base64_encode($pass));
 
-        if (strpos($r, '235') === false) {
-            error_log("[Mailer] Auth failed for $user: ".trim($r));
-            fclose($sock); return false;
+        if (strpos($authResp, '235') === false) {
+            error_log("[Mailer] Auth échouée pour $user : ".trim($authResp));
+            fclose($sock);
+            return false;
         }
 
         $send("MAIL FROM:<$from>");
         $send("RCPT TO:<$to>");
         $send("DATA");
+
         fwrite($sock, $headers."\r\n".$body."\r\n.\r\n");
-        $r = $read();
+        $dataResp = $readAll();
+
         $send("QUIT");
         fclose($sock);
 
-        $ok = strpos($r, '250') !== false;
-        if (!$ok) error_log("[Mailer] Send failed to $to: ".trim($r));
+        $ok = strpos($dataResp, '250') !== false;
+        if (!$ok) {
+            error_log("[Mailer] Envoi échoué vers $to : ".trim($dataResp));
+        }
         return $ok;
     }
 
@@ -141,34 +173,12 @@ class Mailer {
             self::footer()
         );
 
-        return self::smtp($user->getEmail(), $user->getFullName(),
-            'Bienvenue sur SannaStudio — Confirmez votre email', $html);
-    }
-
-    public static function sendResetPassword(User $user, string $token): bool {
-        $link   = SITE_URL.'/reset-password?token='.$token;
-        $prenom = htmlspecialchars($user->getFirstName());
-
-        $html = self::wrap(
-            self::header('Sécurité du compte').
-            '<div style="padding:36px 36px 28px">
-                <h2 style="margin:0 0 12px;color:#9B4FDE;font-size:22px">Réinitialisation du mot de passe</h2>
-                <p style="color:#ccc;line-height:1.8;font-size:14px">
-                    Bonjour '.$prenom.',<br>
-                    Vous avez demandé à réinitialiser votre mot de passe. Cliquez ci-dessous :
-                </p>
-                <div style="text-align:center;margin:30px 0">
-                    <a href="'.$link.'" style="background:#7B2FBE;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:bold;font-size:15px;display:inline-block">
-                        🔑 Réinitialiser mon mot de passe
-                    </a>
-                </div>
-                <p style="color:#555;font-size:11px;text-align:center">Ce lien expire dans 1 heure.</p>
-            </div>'.
-            self::footer()
+        return self::smtp(
+            $user->getEmail(),
+            $user->getFullName(),
+            'Bienvenue sur SannaStudio — Confirmez votre email',
+            $html
         );
-
-        return self::smtp($user->getEmail(), $user->getFullName(),
-            'Réinitialisation de votre mot de passe — SannaStudio', $html);
     }
 
     public static function sendAccountConfirmed(User $user): bool {
@@ -207,6 +217,39 @@ class Mailer {
             $user->getEmail(),
             $user->getFullName(),
             'Votre compte SannaStudio est activé ✔',
+            $html
+        );
+    }
+
+    public static function sendResetPassword(User $user, string $token): bool {
+        $link   = SITE_URL.'/reset-password?token='.$token;
+        $prenom = htmlspecialchars($user->getFirstName());
+
+        $html = self::wrap(
+            self::header('Sécurité du compte').
+            '<div style="padding:36px 36px 28px">
+                <h2 style="margin:0 0 12px;color:#9B4FDE;font-size:22px">Réinitialisation du mot de passe</h2>
+                <p style="color:#ccc;line-height:1.8;font-size:14px">
+                    Bonjour '.$prenom.',<br>
+                    Vous avez demandé à réinitialiser votre mot de passe. Cliquez ci-dessous :
+                </p>
+                <div style="text-align:center;margin:30px 0">
+                    <a href="'.$link.'" style="background:#7B2FBE;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:bold;font-size:15px;display:inline-block">
+                        🔑 Réinitialiser mon mot de passe
+                    </a>
+                </div>
+                <p style="color:#555;font-size:11px;text-align:center">Ce lien expire dans 1 heure.</p>
+                <p style="color:#444;font-size:11px;text-align:center;margin-top:8px">
+                    Si vous n\'avez pas demandé cette réinitialisation, ignorez cet email.
+                </p>
+            </div>'.
+            self::footer()
+        );
+
+        return self::smtp(
+            $user->getEmail(),
+            $user->getFullName(),
+            'Réinitialisation de votre mot de passe — SannaStudio',
             $html
         );
     }

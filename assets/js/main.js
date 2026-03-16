@@ -26,7 +26,7 @@ rdvForm?.addEventListener('submit', async (e) => {
     const plateformes = [...rdvForm.querySelectorAll('input[name="plateformes[]"]:checked')].map(cb => cb.value);
     fd.delete('plateformes[]');
     fd.append('plateformes', plateformes.length ? plateformes.join(', ') : 'Non précisées');
-    const res = await fetch('../php/rdv.php', { method: 'POST', body: fd });
+    const res = await fetch('/rdv', { method: 'POST', body: fd });
     const json = await res.json();
     msg.style.display = 'block';
     if (json.success) {

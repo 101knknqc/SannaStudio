@@ -5,7 +5,7 @@ class ControllerRdv extends Controller {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success'=>false,'error'=>'Méthode non autorisée']); exit;
         }
-        foreach (['nom','email','telephone','service','date','message'] as $f) {
+        foreach (['nom','email','service','date','message'] as $f) {
             if (empty($_POST[$f])) {
                 echo json_encode(['success'=>false,'error'=>"Le champ '$f' est requis."]); exit;
             }
@@ -17,8 +17,12 @@ class ControllerRdv extends Controller {
         $date     = htmlspecialchars(trim($_POST['date']));
         $duration = htmlspecialchars(trim($_POST['duree'] ?? ''));
         $message  = htmlspecialchars(trim($_POST['message']));
-        $plats    = $_POST['plateformes'] ?? [];
-        $platforms = is_array($plats) ? implode(', ', array_map('htmlspecialchars', $plats)) : '';
+        $plats     = $_POST['plateformes'] ?? [];
+        if (is_array($plats)) {
+            $platforms = implode(', ', array_map('htmlspecialchars', $plats));
+        } else {
+            $platforms = htmlspecialchars(trim($plats));
+        }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             echo json_encode(['success'=>false,'error'=>'Adresse email invalide.']); exit;

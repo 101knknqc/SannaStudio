@@ -1,7 +1,7 @@
 <!-- ══ WELCOME ══ -->
 <div class="db-welcome">
     <div class="db-welcome-badge">▶ Espace client</div>
-    <h1>Salut, <span><?= htmlspecialchars($user->getFirstName()) ?></span> 👋</h1>
+    <h1><?= Lang::t('dashboard.welcome') ?> <span><?= htmlspecialchars($user->getFirstName()) ?></span> 👋</h1>
     <p>Bienvenue dans votre espace SannaStudio. Retrouvez ici toutes vos demandes de rendez-vous et gérez votre compte facilement.</p>
     <div class="db-welcome-actions">
         <a href="<?= SITE_URL ?>/#rdv" class="db-btn-primary">
@@ -78,8 +78,8 @@ $inprog    = count(array_filter($appointments, fn($a) => $a->getStatus() === 'in
         <?php if (empty($appointments)): ?>
             <div class="db-empty">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <p>Aucune demande pour l'instant.</p>
-                <a href="<?= SITE_URL ?>/#rdv" class="db-btn-primary" style="font-size:.8rem;padding:9px 20px">Prendre un RDV →</a>
+                <p><?= Lang::t('dashboard.rdv_none') ?></p>
+                <a href="<?= SITE_URL ?>/#rdv" class="db-btn-primary" style="font-size:.8rem;padding:9px 20px"><?= Lang::t('dashboard.rdv_cta') ?> →</a>
             </div>
         <?php else: ?>
             <table class="db-rdv-table">
@@ -102,7 +102,7 @@ $inprog    = count(array_filter($appointments, fn($a) => $a->getStatus() === 'in
                         <td><span class="db-rdv-date"><?= htmlspecialchars($appt->getDate() ?: '—') ?></span></td>
                         <td>
                             <?php
-                            $statusLabels = ['new'=>'Nouveau','in_progress'=>'En cours','completed'=>'Terminé','cancelled'=>'Annulé'];
+                            $statusLabels = ['new'=>Lang::t('dashboard.status_pending'),'in_progress'=>Lang::t('dashboard.status_confirmed'),'completed'=>Lang::t('dashboard.status_done'),'cancelled'=>Lang::t('dashboard.status_cancelled')];
                             $s = $appt->getStatus();
                             ?>
                             <span class="db-badge <?= $s ?>"><?= $statusLabels[$s] ?? $s ?></span>

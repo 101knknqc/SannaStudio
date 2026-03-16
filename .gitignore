@@ -1,0 +1,25 @@
+# Credentials — NE JAMAIS committer
+defines.php
+.env
+*.env
+
+# Logs
+rdv_log.txt
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Node
+node_modules/
+
+# Vieux dossiers de version (utiliser des branches Git)
+v1*/
+v2*/
+v3*/

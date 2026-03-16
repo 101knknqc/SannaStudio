@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?= Lang::current() ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,8 +111,24 @@
             </button>
             <span class="db-topbar-title"><?= htmlspecialchars($title ?? 'Mon espace') ?></span>
         </div>
-        <div class="db-topbar-right">
+        <div class="db-topbar-right" style="display:flex;align-items:center;gap:12px">
             <span class="db-topbar-badge">▶ Espace client</span>
+            <!-- Lang switcher dashboard -->
+            <div class="lang-switcher" id="langSwitcherDb" style="position:relative">
+                <?php $langs = Lang::available(); $cur = Lang::current(); ?>
+                <button class="lang-btn" onclick="document.getElementById('langDropdownDb').classList.toggle('open')" aria-label="Language" style="padding:5px 10px;font-size:10px">
+                    <span><?= $langs[$cur]['emoji'] ?? '🌐' ?></span>
+                    <span><?= strtoupper($cur) ?></span>
+                </button>
+                <div class="lang-dropdown" id="langDropdownDb">
+                    <?php foreach ($langs as $code => $info): ?>
+                        <a href="?lang=<?= $code ?>" class="lang-option <?= $code === $cur ? 'active' : '' ?>">
+                            <span class="lang-flag"><?= $info['emoji'] ?></span>
+                            <span><?= htmlspecialchars($info['name']) ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -131,6 +147,13 @@ function toggleSidebar() {
     document.getElementById('dbSidebar').classList.toggle('open');
     document.getElementById('sidebarOverlay').classList.toggle('open');
 }
+</script>
+<script>
+document.addEventListener('click', function(e) {
+    const sw = document.getElementById('langSwitcherDb');
+    const dd = document.getElementById('langDropdownDb');
+    if (sw && !sw.contains(e.target)) dd?.classList.remove('open');
+});
 </script>
 </body>
 </html>

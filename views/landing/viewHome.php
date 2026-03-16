@@ -7,10 +7,9 @@
 
             <!-- COL 1 : Texte -->
             <div class="hero-content">
-                <div class="hero-badge">▶ Webdiffusion Professionnelle</div>
+                <div class="hero-badge"><?= Lang::t('hero.badge') ?></div>
                 <h1 class="hero-title">
-                    <span class="line-1">DIFFUSION</span><span class="line-2">SANS</span><span
-                        class="line-3">LIMITES</span>
+                    <span class="line-1"><?= Lang::t('hero.line1') ?></span><span class="line-2"><?= Lang::t('hero.line2') ?></span><span class="line-3"><?= Lang::t('hero.line3') ?></span>
                 </h1>
                 <p class="hero-sub">
                     SannaStudio n'est pas juste une équipe qui <strong>«fait des lives»</strong>.
@@ -18,8 +17,8 @@
                     de l'événement unique à l'installation permanente.
                 </p>
                 <div class="hero-actions">
-                    <a href="#rdv" class="btn-primary">Réserver maintenant</a>
-                    <a href="#services" class="btn-secondary">Nos services</a>
+                    <a href="#rdv" class="btn-primary"><?= Lang::t('hero.btn_primary') ?></a>
+                    <a href="#services" class="btn-secondary"><?= Lang::t('hero.btn_secondary') ?></a>
                 </div>
             </div>
 
@@ -29,7 +28,7 @@
                 <div class="hero-visual-ring ring-2"></div>
                 <div class="hero-visual-ring ring-3"></div>
                 <div class="hero-visual-core">
-                    <img src="<?= SITE_URL ?>/assets/img/sannastudioprod.png" alt="SannaStudio">
+                    <img src="<?= SITE_URL ?>/assets/img/logo-white.png" alt="SannaStudio">
                 </div>
                 <div class="hero-orbit-dot dot-1"></div>
                 <div class="hero-orbit-dot dot-2"></div>
@@ -57,7 +56,7 @@
             </div>
 
         </div>
-        <div class="scroll-hint">DÉFILER</div>
+        <div class="scroll-hint"><?= Lang::t('hero.scroll') ?></div>
     </section>
 
     <!-- ══ TICKER ══ -->

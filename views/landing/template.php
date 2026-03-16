@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?= Lang::current() ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,26 +24,44 @@
             <img src="<?= SITE_URL ?>/assets/img/logo-white.png" alt="SannaStudio">
         </a>
         <ul class="nav-links">
-            <li><a href="<?= SITE_URL ?>/#services">Services</a></li>
-            <li><a href="<?= SITE_URL ?>/#process">Processus</a></li>
-            <li><a href="<?= SITE_URL ?>/#platforms">Plateformes</a></li>
-            <li><a href="<?= SITE_URL ?>/#equipe">Équipe</a></li>
-            <li><a href="<?= SITE_URL ?>/#discord">Discord</a></li>
-            <li><a href="<?= SITE_URL ?>/#rdv" class="nav-cta">Prendre RDV</a></li>
+            <li><a href="<?= SITE_URL ?>/#services"><?= Lang::t('nav.services') ?></a></li>
+            <li><a href="<?= SITE_URL ?>/#process"><?= Lang::t('nav.process') ?></a></li>
+            <li><a href="<?= SITE_URL ?>/#platforms"><?= Lang::t('nav.platforms') ?></a></li>
+            <li><a href="<?= SITE_URL ?>/#equipe"><?= Lang::t('nav.team') ?></a></li>
+            <li><a href="<?= SITE_URL ?>/#discord"><?= Lang::t('nav.discord') ?></a></li>
+            <li><a href="<?= SITE_URL ?>/#rdv" class="nav-cta"><?= Lang::t('nav.rdv') ?></a></li>
         </ul>
 
         <!-- Auth zone -->
         <div class="nav-auth">
             <?php if (Session::isLoggedIn()): ?>
                 <div class="nav-auth-user">
-                    <span>👋 <?= htmlspecialchars(Session::get('user_first_name')) ?></span>
-                    <a href="<?= SITE_URL ?>/dashboard" class="dash-btn">Mon espace</a>
-                    <a href="<?= SITE_URL ?>/deconnexion">Déconnexion</a>
+                    <span><?= Lang::t('nav.hello') ?> <?= htmlspecialchars(Session::get('user_first_name')) ?></span>
+                    <a href="<?= SITE_URL ?>/dashboard" class="dash-btn"><?= Lang::t('nav.dashboard') ?></a>
+                    <a href="<?= SITE_URL ?>/deconnexion"><?= Lang::t('nav.logout') ?></a>
                 </div>
             <?php else: ?>
-                <a href="<?= SITE_URL ?>/connexion" class="nav-auth-login">Connexion</a>
-                <a href="<?= SITE_URL ?>/inscription" class="nav-auth-btn">Créer un compte</a>
+                <a href="<?= SITE_URL ?>/connexion" class="nav-auth-login"><?= Lang::t('nav.login') ?></a>
+                <a href="<?= SITE_URL ?>/inscription" class="nav-auth-btn"><?= Lang::t('nav.register') ?></a>
             <?php endif; ?>
+
+            <!-- Sélecteur de langue -->
+            <div class="lang-switcher" id="langSwitcher">
+                <?php $langs = Lang::available(); $cur = Lang::current(); ?>
+                <button class="lang-btn" onclick="document.getElementById('langDropdown').classList.toggle('open')" aria-label="Language">
+                    <span class="lang-flag"><?= $langs[$cur]['emoji'] ?? '🌐' ?></span>
+                    <span><?= strtoupper($cur) ?></span>
+                    <span style="font-size:8px;opacity:.6">▼</span>
+                </button>
+                <div class="lang-dropdown" id="langDropdown">
+                    <?php foreach ($langs as $code => $info): ?>
+                        <a href="?lang=<?= $code ?>" class="lang-option <?= $code === $cur ? 'active' : '' ?>">
+                            <span class="lang-flag"><?= $info['emoji'] ?></span>
+                            <span><?= htmlspecialchars($info['name']) ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
 
         <button class="hamburger" aria-label="Menu">
@@ -59,34 +77,40 @@
         <div class="footer-grid">
             <div class="footer-brand">
                 <img src="<?= SITE_URL ?>/assets/img/logo-white.png" alt="SannaStudio" class="footer-main-logo" loading="lazy">
-                <p>SannaStudio est un prestataire technique spécialisé en webdiffusion professionnelle et intégration audiovisuelle. De l'événement unique à l'installation permanente.</p>
+                <p><?= Lang::t('footer.desc') ?></p>
             </div>
             <div class="footer-col">
-                <h4>Services</h4>
+                <h4><?= Lang::t('footer.col1_title') ?></h4>
                 <ul>
-                    <li><a href="<?= SITE_URL ?>/#services">Webdiffusion événementielle</a></li>
-                    <li><a href="<?= SITE_URL ?>/#services">Installation permanente</a></li>
-                    <li><a href="<?= SITE_URL ?>/#services">Formation OBS Studio</a></li>
-                    <li><a href="<?= SITE_URL ?>/#services">Support technique</a></li>
-                    <li><a href="<?= SITE_URL ?>/#services">Maintenance</a></li>
+                    <li><a href="<?= SITE_URL ?>/#services"><?= Lang::t('services.svc1_title') ?></a></li>
+                    <li><a href="<?= SITE_URL ?>/#services"><?= Lang::t('services.svc2_title') ?></a></li>
+                    <li><a href="<?= SITE_URL ?>/#services"><?= Lang::t('services.svc3_title') ?></a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Liens rapides</h4>
+                <h4><?= Lang::t('footer.col2_title') ?></h4>
                 <ul>
-                    <li><a href="<?= SITE_URL ?>/#rdv">Prendre rendez-vous</a></li>
-                    <li><a href="<?= SITE_URL ?>/#platforms">Plateformes</a></li>
-                    <li><a href="<?= SITE_URL ?>/#process">Notre processus</a></li>
-                    <li><a href="<?= SITE_URL ?>/#equipe">Notre équipe</a></li>
-                    <li><a href="<?= SITE_URL ?>/connexion">Mon espace client</a></li>
+                    <li><a href="<?= SITE_URL ?>/#rdv"><?= Lang::t('footer.link_rdv') ?></a></li>
+                    <li><a href="<?= SITE_URL ?>/#platforms"><?= Lang::t('footer.link_platforms') ?></a></li>
+                    <li><a href="<?= SITE_URL ?>/#process"><?= Lang::t('footer.link_process') ?></a></li>
+                    <li><a href="<?= SITE_URL ?>/#equipe"><?= Lang::t('footer.link_team') ?></a></li>
+                    <li><a href="<?= SITE_URL ?>/connexion"><?= Lang::t('footer.link_dashboard') ?></a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>© <?= date('Y') ?> SannaStudio. Tous droits réservés.</p>
+            <p>© <?= date('Y') ?> <?= Lang::t('footer.copyright') ?></p>
         </div>
     </footer>
 
     <script src="<?= SITE_URL ?>/assets/js/main.js"></script>
+    <script>
+    // Fermer le dropdown lang en cliquant ailleurs
+    document.addEventListener('click', function(e) {
+        const sw = document.getElementById('langSwitcher');
+        const dd = document.getElementById('langDropdown');
+        if (sw && !sw.contains(e.target)) dd?.classList.remove('open');
+    });
+    </script>
 </body>
 </html>

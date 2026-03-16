@@ -613,3 +613,40 @@ body {
     .db-stats   { grid-template-columns: 1fr; }
     .db-actions { grid-template-columns: 1fr; }
 }
+/* ══════════════════════════════════════════
+   LANG SWITCHER (dashboard)
+══════════════════════════════════════════ */
+.lang-switcher { position: relative; display: flex; align-items: center; }
+.lang-btn {
+  background: rgba(123,47,190,0.12);
+  border: 1px solid rgba(123,47,190,0.3);
+  color: #F5F5F5;
+  padding: 5px 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.2s, border-color 0.2s;
+  border-radius: 3px;
+}
+.lang-btn:hover { background: rgba(123,47,190,0.25); border-color: #7B2FBE; }
+.lang-dropdown {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  background: #161616; border: 1px solid rgba(123,47,190,0.35);
+  border-radius: 4px; min-width: 140px; z-index: 2000;
+  overflow: hidden; display: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+.lang-dropdown.open { display: block; }
+.lang-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; color: #ccc; text-decoration: none;
+  font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px;
+  transition: background 0.15s, color 0.15s;
+}
+.lang-option:hover { background: rgba(123,47,190,0.15); color: #F5F5F5; }
+.lang-option.active { color: #9B4FDE; background: rgba(123,47,190,0.08); }
+.lang-flag { font-size: 15px; line-height: 1; }

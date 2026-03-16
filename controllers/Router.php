@@ -13,29 +13,29 @@ class Router {
 
         Session::start();
 
+        // Initialiser le système de traductions
+        Lang::init();
+
         try {
             $rawRoute = filter_var($_GET['route'] ?? '', FILTER_SANITIZE_URL);
             $segments = array_values(array_filter(explode('/', trim($rawRoute, '/'))));
             $page     = strtolower($segments[0] ?? 'home');
 
-            // Mapping routes → controllers
             $map = [
-                ''               => 'ControllerHome',
-                'home'           => 'ControllerHome',
-                'admin' => 'ControllerAdmin',
-                'inscription'    => 'ControllerInscription',
-                'connexion'      => 'ControllerConnexion',
-                'deconnexion'    => 'ControllerDeconnexion',
-                'dashboard'      => 'ControllerDashboard',
-                'verify'         => 'ControllerVerify',
-                'rdv'            => 'ControllerRdv',
-                'reset-password' => 'ControllerResetPassword',
+                ''                    => 'ControllerHome',
+                'home'                => 'ControllerHome',
+                'admin'               => 'ControllerAdmin',
+                'inscription'         => 'ControllerInscription',
+                'connexion'           => 'ControllerConnexion',
+                'deconnexion'         => 'ControllerDeconnexion',
+                'dashboard'           => 'ControllerDashboard',
+                'verify'              => 'ControllerVerify',
+                'rdv'                 => 'ControllerRdv',
+                'reset-password'      => 'ControllerResetPassword',
                 'mot-de-passe-oublie' => 'ControllerMotDePasseOublie',
-                
             ];
 
             $controllerClass = $map[$page] ?? null;
-
             if (!$controllerClass) throw new Exception("404 — Page introuvable");
 
             $controllerFile = __DIR__.'/'.$controllerClass.'.php';
